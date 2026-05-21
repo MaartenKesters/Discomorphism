@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@fal-ai/client": "*",
+    "replicate": "*",
     "@vercel/kv": "*",
     "next": "14.2.5",
     "react": "^18",

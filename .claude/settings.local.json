@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\MKesters\\\\Documents\\\\Agents\\\\spotify\" -Recurse | Where-Object { -not $_.PSIsContainer } | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\MKesters\\\\Documents\\\\Agents\\\\spotify\\\\\", \"\"\\) })"
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\MKesters\\\\Documents\\\\Agents\\\\spotify\" -Recurse | Where-Object { -not $_.PSIsContainer } | Select-Object FullName | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\MKesters\\\\Documents\\\\Agents\\\\spotify\\\\\", \"\"\\) })",
+      "Bash(npm install *)",
+      "PowerShell(Get-Command node, npm, pnpm, yarn -ErrorAction SilentlyContinue)",
+      "PowerShell($env:PATH -split \";\" | Where-Object { $_ -match \"node|npm|nvm\" })",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\", \"C:\\\\Program Files \\(x86\\)\\\\nodejs\", \"$env:APPDATA\\\\npm\", \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object FullName)"
     ]
   }
 }
