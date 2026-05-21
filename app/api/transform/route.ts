@@ -15,13 +15,6 @@ const kv = createClient({
 
 const TIMEOUT_MS = 60_000;
 
-interface FluxGeneralInput {
-  image_url: string;
-  prompt: string;
-  strength: number;
-  num_inference_steps: number;
-}
-
 interface FluxGeneralOutput {
   images: Array<{ url: string; width: number; height: number; content_type: string }>;
   seed: number;
@@ -65,13 +58,13 @@ export async function POST(req: NextRequest) {
     );
 
     const result = await Promise.race([
-      fal.subscribe<FluxGeneralInput, FluxGeneralOutput>("fal-ai/flux-general", {
+      fal.subscribe<FluxGeneralOutput>("fal-ai/flux-general", {
         input: {
           image_url: imageUrl,
           prompt: PROMPT,
           strength: 0.75,
           num_inference_steps: 28,
-        },
+        } as any,
       }),
       timeout,
     ]);
