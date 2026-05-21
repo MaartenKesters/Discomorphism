@@ -47,14 +47,15 @@ export async function POST(req: NextRequest) {
     const file = new File([buffer], `input.${ext}`, { type: mimeType });
     const imageUrl = await fal.storage.upload(file);
 
-    // Run img2img
+    // Run img2img — cast to `any` because the SDK types for flux-general
+    // don't expose image_url even though the model accepts it at runtime.
     const result = await fal.subscribe("fal-ai/flux-general", {
       input: {
         image_url: imageUrl,
         prompt: PROMPT,
         strength: 0.75,
         num_inference_steps: 28,
-      },
+      } as any,
     });
 
     const output = result.data as FluxGeneralOutput;
