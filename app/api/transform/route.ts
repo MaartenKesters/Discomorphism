@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     );
 
     const result = await Promise.race([
-      fal.subscribe<FluxGeneralOutput>("fal-ai/flux-general", {
+      fal.subscribe("fal-ai/flux-general", {
         input: {
           image_url: imageUrl,
           prompt: PROMPT,
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       timeout,
     ]);
 
-    const output = result.data;
+    const output = (result as any).data as FluxGeneralOutput;
     const outputUrl = output.images?.[0]?.url;
     if (!outputUrl) {
       throw new Error("No output image returned by fal.ai");
