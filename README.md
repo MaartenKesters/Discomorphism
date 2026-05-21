@@ -32,7 +32,7 @@ Upload your image — it comes back wrapped in mirrored facets, specular highlig
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/discomorphism.git
+git clone https://github.com/MaartenKesters/Discomorphism.git
 cd discomorphism
 npm install
 ```

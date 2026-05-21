@@ -137,9 +137,11 @@ export default function Home() {
 
   const download = () => {
     if (!result) return;
+    const mimeMatch = result.match(/^data:(image\/[\w+]+);base64,/);
+    const ext = mimeMatch ? mimeMatch[1].split("/")[1].replace("jpeg", "jpg") : "jpg";
     const a = document.createElement("a");
     a.href = result;
-    a.download = "discomorphism.jpg";
+    a.download = `discomorphism.${ext}`;
     a.click();
   };
 
@@ -194,7 +196,7 @@ export default function Home() {
             All {stats?.total ?? 300} free generations have been used up.
           </p>
           <a
-            href="https://github.com/your-username/discomorphism"
+            href="https://github.com/MaartenKesters/Discomorphism"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-5 py-2 rounded-full border border-[#c0a0ff] text-[#c0a0ff] text-sm hover:bg-[#c0a0ff] hover:text-black transition-colors"
@@ -330,7 +332,7 @@ export default function Home() {
         <p>
           Discomorphism — riding the Spotify 20th anniversary wave 🪩 —{" "}
           <a
-            href="https://github.com/your-username/discomorphism"
+            href="https://github.com/MaartenKesters/Discomorphism"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-[#888] transition-colors underline underline-offset-2"

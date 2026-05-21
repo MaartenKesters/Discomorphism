@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fal } from "@fal-ai/client";
-import { kv } from "@vercel/kv";
+import { createClient  } from "@vercel/kv";
 
 const MAX_USES = parseInt(process.env.MAX_USES ?? "300", 10);
 
@@ -8,6 +8,19 @@ const PROMPT =
   "disco ball style, mirrored facets, glitter reflections, specular highlights, shiny, photorealistic disco ball texture overlaid on the image, original image content clearly recognizable, dark background, studio lighting";
 
 fal.config({ credentials: process.env.FAL_API_KEY });
+const kv = createClient({
+  url: process.env.DISCO_KV_REST_API_URL!,
+  token: process.env.DISCO_KV_REST_API_TOKEN!,
+});
+
+const TIMEOUT_MS = 60_000;
+
+interface FluxGeneralInput {
+  image_url: string;
+  prompt: string;
+  strength: number;
+  num_inference_steps: number;
+}
 
 interface FluxGeneralOutput {
   images: Array<{ url: string; width: number; height: number; content_type: string }>;
@@ -47,18 +60,23 @@ export async function POST(req: NextRequest) {
     const file = new File([buffer], `input.${ext}`, { type: mimeType });
     const imageUrl = await fal.storage.upload(file);
 
-    // Run img2img — cast to `any` because the SDK types for flux-general
-    // don't expose image_url even though the model accepts it at runtime.
-    const result = await fal.subscribe("fal-ai/flux-general", {
-      input: {
-        image_url: imageUrl,
-        prompt: PROMPT,
-        strength: 0.75,
-        num_inference_steps: 28,
-      } as any,
-    });
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("fal.ai request timed out")), TIMEOUT_MS)
+    );
 
-    const output = result.data as FluxGeneralOutput;
+    const result = await Promise.race([
+      fal.subscribe<FluxGeneralInput, FluxGeneralOutput>("fal-ai/flux-general", {
+        input: {
+          image_url: imageUrl,
+          prompt: PROMPT,
+          strength: 0.75,
+          num_inference_steps: 28,
+        },
+      }),
+      timeout,
+    ]);
+
+    const output = result.data;
     const outputUrl = output.images?.[0]?.url;
     if (!outputUrl) {
       throw new Error("No output image returned by fal.ai");
