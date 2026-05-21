@@ -5,7 +5,7 @@ import { createClient } from "@vercel/kv";
 const MAX_USES = parseInt(process.env.MAX_USES ?? "300", 10);
 
 const PROMPT =
-  "disco ball style, mirrored facets, glitter reflections, specular highlights, shiny, photorealistic disco ball texture overlaid on the image, original image content clearly recognizable, dark background, studio lighting";
+  "faceted disco ball surface, reflective polygon mirror segments, disco ball geometry, glitter sparkles, specular light flares, iridescent highlights, shimmering reflective facets, dark studio background, original colors and shape preserved, same color palette as input image, photorealistic";
 
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const kv = createClient({
@@ -42,12 +42,10 @@ export async function POST(req: NextRequest) {
     );
 
     const rawOutput = await Promise.race([
-      replicate.run("black-forest-labs/flux-dev", {
+      replicate.run("black-forest-labs/flux-2-pro", {
         input: {
           image,
-          prompt: PROMPT,
-          strength: 0.75,
-          num_inference_steps: 28,
+          prompt: PROMPT
         },
       }),
       timeout,
