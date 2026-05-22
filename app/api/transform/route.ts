@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import OpenAI, { toFile } from "openai";
 import { createClient } from "@vercel/kv";
 
 const MAX_USES = parseInt(process.env.MAX_USES ?? "300", 10);
@@ -36,10 +36,9 @@ export async function POST(req: NextRequest) {
     }
     await kv.incr("total_uses");
 
-    // Convert base64 data URL to a File object for the OpenAI API
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const imageBuffer = Buffer.from(base64Data, "base64");
-    const imageFile = new File([imageBuffer], "input.png", { type: "image/png" });
+    const imageFile = await toFile(imageBuffer, "input.png", { type: "image/png" });
 
     const timeout = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("OpenAI request timed out")), TIMEOUT_MS)
@@ -61,9 +60,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ image: `data:image/png;base64,${b64Json}` });
   } catch (err) {
-    console.error("[transform]", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[transform]", message);
     return NextResponse.json(
-      { error: "Failed to transform image. Please try again." },
+      { error: `Failed to transform image: ${message}` },
       { status: 500 }
     );
   }
