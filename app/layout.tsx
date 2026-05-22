@@ -8,6 +8,9 @@ const BASE_URL = "https://discomorphism.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
+  verification: {
+    google: "qiQtw-tm0_1evGJfE3OLWBAvY1Q_L8hIqjJUQb9t-kQ",
+  },
   title: "Discomorphism — Spotify Disco Ball AI Image Generator",
   description:
     "Turn any logo, photo, or image into a glittering disco ball with AI — free, instant, no sign-up. Join the viral Spotify 20th anniversary Discomorphism trend.",
