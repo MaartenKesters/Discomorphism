@@ -5,7 +5,7 @@ import { createClient } from "@vercel/kv";
 const MAX_USES = parseInt(process.env.MAX_USES ?? "300", 10);
 
 const PROMPT =
-  "faceted disco ball surface, reflective polygon mirror segments, disco ball geometry, glitter sparkles, specular light flares, iridescent highlights, shimmering reflective facets, dark studio background, original colors and shape preserved, same color palette as input image, photorealistic";
+  "Cover the surface of the input image with small square reflective mirror tiles, preserving the exact shape, silhouette, exact colors and composition of the original subject. The color areas stay exactly the same but with mirror tiles. The subject must look identical to the input but with a tiled mirror surface and a little but bloated into a 3D ball, just like a disco ball. Add subtle specular highlights and glitter sparkles. Dark background. Do not introduce any new shapes or objects. Photorealistic.";
 
 const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 const kv = createClient({
@@ -44,8 +44,11 @@ export async function POST(req: NextRequest) {
     const rawOutput = await Promise.race([
       replicate.run("black-forest-labs/flux-2-pro", {
         input: {
-          image,
-          prompt: PROMPT
+          prompt: PROMPT,
+          input_images: [image],
+          aspect_ratio: "match_input_image",
+          resolution: "match_input_image",
+          output_format: "jpg",
         },
       }),
       timeout,
