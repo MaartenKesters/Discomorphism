@@ -3,11 +3,11 @@
 > Transform any logo or image into a glittering disco ball version using AI.
 
 Discomorphism is a one-click AI image transformer built on [OpenAI](https://openai.com)'s gpt-image-1 model.
-Upload your image — it comes back wrapped in mirrored facets, specular highlights, and full disco energy.
+Upload your image, it comes back wrapped in mirrored facets, specular highlights, and full disco energy.
 
-**Riding the Spotify 20th anniversary "Discomorphism" wave** — the internet-wide trend of reimagining logos and photos as disco ball art.
+**Riding the Spotify 20th anniversary "Discomorphism" wave**, the internet-wide trend of reimagining logos and photos as disco ball art.
 
-**Live demo:** [your-vercel-url.vercel.app](https://your-vercel-url.vercel.app)
+**Live demo:** [discomorphism.vercel.app/](https://discomorphism.vercel.app/)
 
 ---
 
@@ -15,7 +15,7 @@ Upload your image — it comes back wrapped in mirrored facets, specular highlig
 
 1. You upload a PNG, JPG, or SVG (max 5 MB).
 2. The image is sent to OpenAI's `gpt-image-1` model using the images.edit endpoint.
-3. gpt-image-1 applies the disco ball style prompt — tiling the surface with mirror segments while preserving the original shape and colours.
+3. gpt-image-1 applies the disco ball style prompt, tiling the surface with mirror segments while preserving the original shape and colours.
 4. Vercel KV tracks total free uses; once the free tier cap is hit, visitors are invited to self-host.
 
 ---
@@ -104,4 +104,4 @@ MIT
 
 ---
 
-Built by [Your Name](https://linkedin.com/in/your-profile)
+Built by [Maarten Kesters](https://www.linkedin.com/in/maarten-kesters/)
