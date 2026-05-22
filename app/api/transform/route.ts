@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Replicate from "replicate";
+import OpenAI from "openai";
 import { createClient } from "@vercel/kv";
 
 const MAX_USES = parseInt(process.env.MAX_USES ?? "300", 10);
 
 const PROMPT =
-  "Cover the surface of the input image with small square reflective mirror tiles, preserving the exact shape, silhouette, exact colors and composition of the original subject. The color areas stay exactly the same but with mirror tiles. The subject must look identical to the input but with a tiled mirror surface and a little but bloated into a 3D ball, just like a disco ball. Add subtle specular highlights and glitter sparkles. Dark background. Do not introduce any new shapes or objects. Photorealistic.";
+  "Cover the surface of the input image with small square reflective mirror tiles, preserving the exact shape, silhouette, exact colors and composition of the original subject. The color areas stay exactly the same but with mirror tiles. The subject must look identical to the input but with a tiled mirror surface and a little bloated into a 3D ball, just like a disco ball. Add subtle specular highlights and glitter sparkles. Dark background. Do not introduce any new shapes or objects. Photorealistic.";
 
-const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const kv = createClient({
   url: process.env.DISCO_KV_REST_API_URL!,
   token: process.env.DISCO_KV_REST_API_TOKEN!,
@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid image data" }, { status: 400 });
     }
 
-    // Check and atomically increment usage
     const currentUses = (await kv.get<number>("total_uses")) ?? 0;
     if (currentUses >= MAX_USES) {
       return NextResponse.json(
@@ -37,37 +36,30 @@ export async function POST(req: NextRequest) {
     }
     await kv.incr("total_uses");
 
+    // Convert base64 data URL to a File object for the OpenAI API
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+    const imageBuffer = Buffer.from(base64Data, "base64");
+    const imageFile = new File([imageBuffer], "input.png", { type: "image/png" });
+
     const timeout = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Replicate request timed out")), TIMEOUT_MS)
+      setTimeout(() => reject(new Error("OpenAI request timed out")), TIMEOUT_MS)
     );
 
-    const rawOutput = await Promise.race([
-      replicate.run("black-forest-labs/flux-2-pro", {
-        input: {
-          prompt: PROMPT,
-          input_images: [image],
-          aspect_ratio: "match_input_image",
-          resolution: "match_input_image",
-          output_format: "jpg",
-        },
+    const response = await Promise.race([
+      openai.images.edit({
+        model: "gpt-image-1",
+        image: imageFile,
+        prompt: PROMPT,
+        n: 1,
+        size: "1024x1024",
       }),
       timeout,
     ]);
 
-    const outputItem = Array.isArray(rawOutput) ? rawOutput[0] : rawOutput;
-    if (!outputItem) {
-      throw new Error("No output image returned by Replicate");
-    }
+    const b64Json = response.data[0]?.b64_json;
+    if (!b64Json) throw new Error("No output image returned by OpenAI");
 
-    // FileOutput objects stringify to their CDN URL
-    const outputUrl = String(outputItem);
-
-    // Fetch and return as base64 so the client doesn't need CORS access to Replicate CDN
-    const imageRes = await fetch(outputUrl);
-    const imageBuffer = await imageRes.arrayBuffer();
-    const outputBase64 = `data:image/jpeg;base64,${Buffer.from(imageBuffer).toString("base64")}`;
-
-    return NextResponse.json({ image: outputBase64 });
+    return NextResponse.json({ image: `data:image/png;base64,${b64Json}` });
   } catch (err) {
     console.error("[transform]", err);
     return NextResponse.json(

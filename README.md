@@ -2,7 +2,7 @@
 
 > Transform any logo or image into a glittering disco ball version using AI.
 
-Discomorphism is a one-click AI image transformer built on [Replicate](https://replicate.com)'s FLUX model.
+Discomorphism is a one-click AI image transformer built on [OpenAI](https://openai.com)'s gpt-image-1 model.
 Upload your image — it comes back wrapped in mirrored facets, specular highlights, and full disco energy.
 
 **Riding the Spotify 20th anniversary "Discomorphism" wave** — the internet-wide trend of reimagining logos and photos as disco ball art.
@@ -14,8 +14,8 @@ Upload your image — it comes back wrapped in mirrored facets, specular highlig
 ## How it works
 
 1. You upload a PNG, JPG, or SVG (max 5 MB).
-2. The image is sent to Replicate's `black-forest-labs/flux-dev` model using an img2img pipeline.
-3. FLUX applies the disco ball style prompt with `strength: 0.75` — enough to add the effect while keeping your original content recognisable.
+2. The image is sent to OpenAI's `gpt-image-1` model using the images.edit endpoint.
+3. gpt-image-1 applies the disco ball style prompt — tiling the surface with mirror segments while preserving the original shape and colours.
 4. Vercel KV tracks total free uses; once the free tier cap is hit, visitors are invited to self-host.
 
 ---
@@ -26,7 +26,7 @@ Upload your image — it comes back wrapped in mirrored facets, specular highlig
 
 | Service | Purpose | Sign-up |
 |---------|---------|---------|
-| [Replicate](https://replicate.com) | Image generation | [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens) |
+| [OpenAI](https://openai.com) | Image generation | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | [Vercel](https://vercel.com) | Hosting + KV store | [vercel.com](https://vercel.com) |
 
 ### 1. Clone the repo
@@ -46,7 +46,7 @@ cp .env.example .env.local
 ```
 
 ```env
-REPLICATE_API_TOKEN=your_replicate_api_token_here
+OPENAI_API_KEY=your_openai_api_key_here
 KV_REST_API_URL=your_vercel_kv_rest_url
 KV_REST_API_TOKEN=your_vercel_kv_rest_token
 MAX_USES=300
@@ -77,7 +77,7 @@ Make sure to add the environment variables in the Vercel project settings
 ## Stack
 
 - **Next.js 14** (App Router, TypeScript)
-- **Replicate** `black-forest-labs/flux-dev` — FLUX img2img
+- **OpenAI** `gpt-image-1` — images.edit endpoint
 - **Vercel KV** — usage counter (Redis)
 - **Tailwind CSS** — styling
 
