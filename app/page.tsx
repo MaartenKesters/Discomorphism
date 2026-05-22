@@ -1,11 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-
-interface Stats {
-  used: number;
-  total: number;
-}
+import { useState, useCallback, useRef } from "react";
 
 const ACCEPTED = ["image/png", "image/jpeg", "image/svg+xml"];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -30,7 +25,6 @@ function convertSvgToPng(dataUrl: string): Promise<string> {
 }
 
 export default function Home() {
-  const [stats, setStats] = useState<Stats | null>(null);
   const [original, setOriginal] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,23 +32,6 @@ export default function Home() {
   const [dragging, setDragging] = useState(false);
   const [limitReached, setLimitReached] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  const fetchStats = useCallback(async () => {
-    try {
-      const res = await fetch("/api/stats");
-      if (res.ok) {
-        const data: Stats = await res.json();
-        setStats(data);
-        if (data.used >= data.total) setLimitReached(true);
-      }
-    } catch {
-      // non-fatal
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
 
   const processFile = useCallback(
     async (file: File) => {
@@ -105,7 +82,6 @@ export default function Home() {
 
           const data = await res.json();
           setResult(data.image);
-          fetchStats();
         } catch (err) {
           if (!limitReached) {
             setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -116,7 +92,7 @@ export default function Home() {
       };
       reader.readAsDataURL(file);
     },
-    [fetchStats, limitReached]
+    [limitReached]
   );
 
   const onDrop = useCallback(
@@ -151,9 +127,6 @@ export default function Home() {
     setError(null);
   };
 
-  const remaining = stats ? Math.max(0, stats.total - stats.used) : null;
-  const usagePct = stats ? Math.min(100, (stats.used / stats.total) * 100) : 0;
-
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-12 bg-[#0a0a0a]">
       {/* ── Header ── */}
@@ -168,32 +141,13 @@ export default function Home() {
         </p>
       </header>
 
-      {/* ── Usage bar ── */}
-      {stats && (
-        <div className="w-full max-w-sm mb-8 text-center">
-          <p className="text-sm text-[#888] mb-2">
-            {remaining !== null && (
-              <>
-                <span className="text-white font-semibold">{remaining.toLocaleString()}</span>
-                {" / "}
-                <span>{stats.total.toLocaleString()}</span>
-                {" free uses remaining"}
-              </>
-            )}
-          </p>
-          <div className="usage-bar">
-            <div className="usage-bar-fill" style={{ width: `${usagePct}%` }} />
-          </div>
-        </div>
-      )}
-
       {/* ── Limit reached ── */}
       {limitReached && (
         <div className="w-full max-w-lg mb-8 rounded-2xl border border-[#3a2a4a] bg-[#1a0a2a] p-6 text-center">
           <div className="text-3xl mb-3">🚫</div>
           <p className="text-white font-semibold mb-1">Free tier limit reached</p>
           <p className="text-[#888] text-sm mb-4">
-            All {stats?.total ?? 300} free generations have been used up.
+            The free generation limit has been reached.
           </p>
           <a
             href="https://github.com/MaartenKesters/Discomorphism"
