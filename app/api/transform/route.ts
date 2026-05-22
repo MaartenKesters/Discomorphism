@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       timeout,
     ]);
 
-    const b64Json = response.data[0]?.b64_json;
+    const b64Json = response.data?.[0]?.b64_json;
     if (!b64Json) throw new Error("No output image returned by OpenAI");
 
     return NextResponse.json({ image: `data:image/png;base64,${b64Json}` });
